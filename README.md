@@ -9,18 +9,22 @@ Specifically, this library provides the following:
 - `Waiter`: A context manager/decorator which enforces a minimum time restriction on wrapped operations
 
 
-## `TimeoutManager`
+## TimeoutManager
 This class acts as a simple context manager or decorator for enforcing timeouts around operations.
 
 ### Basic Usage
 #### As a context manager
 ```python
+from timerutil import TimeoutManager
+
 with TimeoutManager(10):
     something_that_should_not_exceed_ten_seconds()
 ```
 
 #### As a decorator
 ```python
+from timerutil import TimeoutManager
+
 @TimeoutManager(10)
 def something_that_should_not_exceed_ten_seconds():
     print("If you can't read this, you're under some heavy load.")
@@ -35,7 +39,7 @@ with TimeoutManager(10, timeout_message='Houston, we have a timeout'):
     something_that_should_not_exceed_ten_seconds()
 ```
 
-#### Suppress `TimeoutError`s from being raised when the timer expires
+#### Suppress `TimeoutError` exceptions
 Sometimes you don't care if when timeouts occur- maybe it's not important enough to interrupt your application.
 In these cases, you can configure `TimeoutManager` to suppress timeout errors so that wrapped operations 
 will fail silently if they exceed your configured duration.
