@@ -1,5 +1,5 @@
 try:
     TimeoutError = TimeoutError
-except NameError:
+except NameError:  # pragma: nocover
     class TimeoutError(OSError):
         pass

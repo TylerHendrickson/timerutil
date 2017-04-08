@@ -8,7 +8,7 @@ from timerutil.exc import TimeoutError
 
 try:
     DEFAULT_TIMEOUT_MESSAGE = os.strerror(errno.ETIME)
-except ValueError:
+except ValueError:  # pragma: nocover
     DEFAULT_TIMEOUT_MESSAGE = 'Timer Expired'
 
 
@@ -38,7 +38,7 @@ class TimeoutManager(contextlib.ContextDecorator):
     >>> print('Maybe exceeded 10 seconds, but no longer executing either way')
     """
 
-    def __init__(self, seconds, timeout_message=os.strerror(errno.ETIME), suppress_timeout_errors=False):
+    def __init__(self, seconds, timeout_message=DEFAULT_TIMEOUT_MESSAGE, suppress_timeout_errors=False):
         """Initializes and configures a new TimeoutManager
 
         :param seconds: The number of seconds after which the managed operation should time out
@@ -50,9 +50,13 @@ class TimeoutManager(contextlib.ContextDecorator):
             Defaults to False so that timeouts will result in a `TimeoutError` being raised.
         :type suppress_timeout_errors: bool
         """
-        self.seconds = int(seconds)
+        self.seconds = seconds
         self.timeout_message = timeout_message
-        self.suppress = bool(suppress_timeout_errors)
+        self.suppress_errors = bool(suppress_timeout_errors)
+        self._original_alarm_handler = None
+
+    def __repr__(self):
+        return '<{name}: {seconds} seconds>'.format(name=self.__class__.__name__, seconds=self.seconds)
 
     def _timeout_handler(self, signum, frame):
         """Raises a `TimeoutError` with the configured message
@@ -61,12 +65,17 @@ class TimeoutManager(contextlib.ContextDecorator):
 
     def __enter__(self):
         """Starts the timeout countdown
+
+        :return: The current instance
+        :rtype: TimeoutManager
         """
         # Save the current SIGALRM handler to restore upon exiting
         self._original_alarm_handler = signal.signal(signal.SIGALRM, self._timeout_handler)
 
         signal.signal(signal.SIGALRM, self._timeout_handler)
         signal.alarm(self.seconds)
+
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Ends the timeout countdown, either because the operation has finished
@@ -79,6 +88,6 @@ class TimeoutManager(contextlib.ContextDecorator):
         signal.signal(signal.SIGALRM, self._original_alarm_handler)
         signal.alarm(0)
 
-        if self.suppress and exc_type is TimeoutError:
+        if self.suppress_errors and exc_type is TimeoutError:
             # Suppress the `TimeoutError` so that the timeout is silenced
             return True
