@@ -1,5 +1,10 @@
 from setuptools import setup
+import sys
 
+
+test_requirements = []
+if sys.version_info < (3, 3):
+    test_requirements = ['mock']
 
 setup(
     name='Timerutil',
@@ -11,6 +16,7 @@ setup(
     long_description=__doc__,
     packages=['timerutil'],
     zip_safe=True,
+    tests_require=test_requirements,
     test_suite='tests',
     classifiers=[
         'Intended Audience :: Developers',
