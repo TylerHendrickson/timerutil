@@ -1,8 +1,8 @@
-import contextlib
 import errno
 import os
 import signal
 
+from timerutil.compat import ContextDecorator
 from timerutil.exc import TimeoutError
 
 
@@ -12,7 +12,7 @@ except ValueError:  # pragma: nocover
     DEFAULT_TIMEOUT_MESSAGE = 'Timer Expired'
 
 
-class TimeoutManager(contextlib.ContextDecorator):
+class TimeoutManager(ContextDecorator):
     """A class for easily putting time restrictions on things
 
     Usage as a context manager:

@@ -11,9 +11,9 @@ We can ensure that it always takes 2 seconds to execute whenever it's called.
 
 This is less useful if your function's normal execution time is subject to a lot of jitter.
 """
-import contextlib
 import time
 
+from timerutil.compat import ContextDecorator
 
 try:
     get_time = time.monotonic
@@ -21,7 +21,7 @@ except AttributeError:  # pragma: nocover
     get_time = time.time
 
 
-class Waiter(contextlib.ContextDecorator):
+class Waiter(ContextDecorator):
     """Context manager/decorator which prevents an operation
     from finishing before a given number of seconds has elapsed.
     """
@@ -49,7 +49,7 @@ class Waiter(contextlib.ContextDecorator):
         """
         try:
             time.sleep(self.minimum_time - (get_time() - self.start_time))
-        except ValueError:
+        except (ValueError, IOError):
             pass
 
 
