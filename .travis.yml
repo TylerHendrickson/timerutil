@@ -34,10 +34,11 @@ matrix:
         - source venv/bin/activate
 
 install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install mock; fi
   - pip install tox coverage
 
 script:
-  - tox
+  - coverage run -m unittest discover
 
 before_deploy:
   - pip install wheel
