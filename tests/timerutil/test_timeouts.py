@@ -4,11 +4,7 @@ import unittest
 
 from timerutil import timeouts
 
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from tests.compat import mock
 
 
 class TimeoutManagerInitTestCase(unittest.TestCase):

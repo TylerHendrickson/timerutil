@@ -3,10 +3,7 @@ import unittest
 
 from timerutil import waits
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+from tests.compat import mock
 
 
 class WaiterEnterTestCase(unittest.TestCase):
