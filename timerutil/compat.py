@@ -1,3 +1,16 @@
+"""Provides resources (either builtin, installed, or reimplemented) to maintain compatibility and consistency
+across different versions of Python.
+
+.. note:: This module always exports the same interface regardless of the current runtime version.
+"""
+import time
+
+__all__ = [
+    'ContextDecorator',
+    'get_time',
+    'TimeoutError'
+]
+
 try:
     from contextlib import ContextDecorator
 except ImportError:  # pragma: nocover
@@ -8,11 +21,12 @@ except ImportError:  # pragma: nocover
     class ContextDecorator(object):
         """A base class or mixin that enables context managers to work as decorators.
 
-        Note: This class has been reimplemented from Python 3.4.3
-            in order to maintain compatibility with versions of Python (before 3.2)
-            where `contextlib.ContextDecorator` does not exist.
-        """
+        .. note:: This class is implemented here in order to maintain compatibility
+            with versions of Python (before 3.2) where :class:`contextlib.ContextDecorator` does not exist.
 
+            Aside from this docstring, the class implemented here is identical to the implementation
+            provided in Python 3.4.3.
+        """
         def _recreate_cm(self):
             """Return a recreated instance of self.
 
@@ -32,3 +46,18 @@ except ImportError:  # pragma: nocover
                     return func(*args, **kwds)
 
             return inner
+
+try:
+    # Prefer using a monotonic clock, if available
+    get_time = time.monotonic
+except AttributeError:  # pragma: nocover
+    get_time = time.time
+
+try:
+    # Check if ``TimeoutError`` is a builtin
+    TimeoutError = TimeoutError
+except NameError:  # pragma: nocover
+    # Implement for versions of Python prior to 3.3
+    class TimeoutError(OSError):
+        """Timeout expired."""
+        pass

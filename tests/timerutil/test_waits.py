@@ -14,7 +14,7 @@ class WaiterEnterTestCase(unittest.TestCase):
         waiter = waits.Waiter(0)
 
         with waiter:
-            self.assertIsInstance(waiter.start_time, float)
+            self.assertIsInstance(waiter._start_time, float)
 
     def test_context_manager_is_self(self):
         waiter = waits.Waiter(0)
@@ -46,7 +46,7 @@ class WaiterExitTestCase(unittest.TestCase):
     def test_will_wait_if_runtime_is_less_than_minimum_time(self):
         minimum_time = 5
         waiter = waits.Waiter(minimum_time)
-        waiter.start_time = waits.get_time()
+        waiter._start_time = waits.get_time()
 
         with mock.patch('time.sleep') as mock_sleep:
             waiter.__exit__(None, None, None)
@@ -68,7 +68,7 @@ class WaiterExitTestCase(unittest.TestCase):
     def test_does_not_raise_exception_if_runtime_is_greater_than_minimum_time(self):
         minimum_time = 5
         waiter = waits.Waiter(minimum_time)
-        waiter.start_time = waits.get_time() - minimum_time
+        waiter._start_time = waits.get_time() - minimum_time
 
         with mock.patch('time.sleep', side_effect=time.sleep) as mock_sleep:
             waiter.__exit__(None, None, None)
@@ -88,31 +88,31 @@ class WaiterExitTestCase(unittest.TestCase):
         )
 
 
-class StatWaiterInitTestCase(unittest.TestCase):
+class ObservingWaiterInitTestCase(unittest.TestCase):
     def test_initial_state(self):
         minimum_time = 5
 
-        waiter = waits.StatWaiter(minimum_time)
+        waiter = waits.ObservingWaiter(minimum_time)
 
         self.assertEqual(waiter.minimum_time, minimum_time)
-        self.assertIsNone(waiter.start_time)
+        self.assertIsNone(waiter._start_time)
         self.assertIsNone(waiter.last_runtime)
         self.assertIsNone(waiter.last_elapsed)
 
 
-class StatWaiterExitTestCase(unittest.TestCase):
+class ObservingWaiterExitTestCase(unittest.TestCase):
     def test_records_last_runtime(self):
-        waiter = waits.StatWaiter(.5)
+        waiter = waits.ObservingWaiter(.5)
         sleep_time = .2
 
         with waiter:
             time.sleep(sleep_time)
         end = waits.get_time()
 
-        self.assertAlmostEqual(sleep_time, waiter.last_runtime, delta=end - waiter.start_time)
+        self.assertAlmostEqual(sleep_time, waiter.last_runtime, delta=end - waiter._start_time)
 
     def test_records_last_elapsed(self):
-        waiter = waits.StatWaiter(.1)
+        waiter = waits.ObservingWaiter(.1)
 
         start = waits.get_time()
         with waiter:

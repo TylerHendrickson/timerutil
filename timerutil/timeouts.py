@@ -2,11 +2,15 @@ import errno
 import os
 import signal
 
-from timerutil.compat import ContextDecorator
-from timerutil.exc import TimeoutError
+from timerutil.compat import (
+    ContextDecorator,
+    TimeoutError
+)
 
+__all__ = ['TimeoutManager']
 
 try:
+    # By default, use the platform-specific error message associated with the :attr:`errno.ETIME` symbol
     DEFAULT_TIMEOUT_MESSAGE = os.strerror(errno.ETIME)
 except ValueError:  # pragma: nocover
     DEFAULT_TIMEOUT_MESSAGE = 'Timer Expired'
@@ -16,26 +20,35 @@ class TimeoutManager(ContextDecorator):
     """A class for easily putting time restrictions on things
 
     Usage as a context manager:
-    >>> import time
-    >>> with TimeoutManager(10):
-    >>>     something_that_should_not_exceed_ten_seconds()
+        .. code-block:: python
+
+            import time
+            with TimeoutManager(10):
+                something_that_should_not_exceed_ten_seconds()
 
     Usage as a decorator:
-    >>> @TimeoutManager(10)
-    >>> def something_that_should_not_exceed_ten_seconds():
-    >>>     time.sleep(5)
+        .. code-block:: python
 
-    Handle timeouts:
-    >>> try:
-    >>>     with TimeoutManager(10):
-    >>>         something_that_should_not_exceed_ten_seconds()
-    >>> except TimeoutError:
-    >>>     print("Got a timeout, couldn't finish")
+            @TimeoutManager(10)
+            def something_that_should_not_exceed_ten_seconds():
+                time.sleep(5)
 
-    Suppress TimeoutError and just die after expiration:
-    >>> with TimeoutManager(10, suppress_timeout_errors=True):
-    >>>     something_that_should_not_exceed_ten_seconds()
-    >>> print('Maybe exceeded 10 seconds, but no longer executing either way')
+    Usage for handling timeouts:
+        .. code-block:: python
+
+            try:
+                with TimeoutManager(10):
+                    something_that_should_not_exceed_ten_seconds()
+            except TimeoutError:
+                print("Got a timeout, couldn't finish")
+
+    As an alternative to raising an exception, you can suppress TimeoutError and just silently end after expiration:
+        .. code-block:: python
+
+            with TimeoutManager(10, suppress_timeout_errors=True):
+                something_that_should_not_exceed_ten_seconds()
+
+            print('Maybe exceeded 10 seconds')
     """
 
     def __init__(self, seconds, timeout_message=DEFAULT_TIMEOUT_MESSAGE, suppress_timeout_errors=False):
@@ -43,11 +56,11 @@ class TimeoutManager(ContextDecorator):
 
         :param seconds: The number of seconds after which the managed operation should time out
         :type seconds: int
-        :param timeout_message: (Optional) Message provided when a `TimeoutError` is raised.
-            Defaults to DEFAULT_TIMEOUT_MESSAGE defined by this module.
+        :param timeout_message: (Optional) Message provided when a :exc:`TimeoutError` is raised.
+            Defaults to :attr:`~DEFAULT_TIMEOUT_MESSAGE` defined by this module.
         :type timeout_message: str
-        :param suppress_timeout_errors: (Optional) If True, operations which have timed out will silently fail.
-            Defaults to False so that timeouts will result in a `TimeoutError` being raised.
+        :param suppress_timeout_errors: (Optional) If ``True``, operations which have timed out will silently fail.
+            Defaults to ``False`` so that timeouts will result in a :exc:`TimeoutError` being raised.
         :type suppress_timeout_errors: bool
         """
         self.seconds = seconds
@@ -59,7 +72,7 @@ class TimeoutManager(ContextDecorator):
         return '<{name}: {seconds} seconds>'.format(name=self.__class__.__name__, seconds=self.seconds)
 
     def _timeout_handler(self, signum, frame):
-        """Raises a `TimeoutError` with the configured message
+        """Raises a :exc:`TimeoutError` with the configured message
         """
         raise TimeoutError(self.timeout_message)
 
