@@ -123,3 +123,40 @@ class ObservableWaiterExitTestCase(unittest.TestCase):
         # and less than the time elapsed between entering and exiting the context manager
         self.assertGreater(waiter.last_elapsed, waiter.minimum_time)
         self.assertLess(waiter.last_elapsed, end - start)
+
+
+class StopWatchInitTestCase(unittest.TestCase):
+    def test_initial_state(self):
+        timer = waits.StopWatch()
+
+        self.assertEqual(timer.minimum_time, 0)
+        self.assertIsNone(timer._start_time)
+        self.assertIsNone(timer.last_runtime)
+        self.assertIsNone(timer.last_elapsed)
+
+
+class StopWatchSetAttrTestCase(unittest.TestCase):
+    def test_raises_AttributeError_when_minimum_time_set_to_nonzero(self):
+        timer = waits.StopWatch()
+
+        with self.assertRaises(AttributeError) as ctx:
+            timer.minimum_time = 1
+
+        self.assertEqual(timer.minimum_time, 0)
+        self.assertEqual(str(ctx.exception), 'minimum_time attribute is read-only')
+
+    def test_minimum_time_can_be_set_to_zero(self):
+        timer = waits.StopWatch()
+
+        try:
+            timer.minimum_time = 0
+        except Exception as e:
+            self.fail('{} unexpectedly raised'.format(repr(e)))
+
+    def test_other_attributes_can_be_set(self):
+        timer = waits.StopWatch()
+
+        try:
+            timer.last_elapsed = 1
+        except Exception as e:
+            self.fail('{} unexpectedly raised'.format(repr(e)))
