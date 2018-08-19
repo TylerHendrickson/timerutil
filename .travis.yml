@@ -26,10 +26,13 @@ matrix:
 
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install mock; fi
-  - pip install coverage
+  - pip install coverage codecov
 
 script:
   - coverage run -m unittest discover
+
+after_success:
+  - codecov
 
 before_deploy:
   - pip install wheel
