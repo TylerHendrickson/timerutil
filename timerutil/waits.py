@@ -18,7 +18,7 @@ from timerutil.compat import (
 )
 
 __all__ = [
-    'ObservingWaiter',
+    'ObservableWaiter',
     'StopWatch',
     'Waiter'
 ]
@@ -77,7 +77,7 @@ class Waiter(ContextDecorator):
             pass
 
 
-class ObservingWaiter(Waiter):
+class ObservableWaiter(Waiter):
     """A :class:`~Waiter` subclass which behaves exactly the same as its parent,
     except that it records usage statistics for inspection.
 
@@ -90,7 +90,7 @@ class ObservingWaiter(Waiter):
     Usage as a decorator:
         .. code-block:: python
 
-            ten_second_waiter = ObservingWaiter(10)
+            ten_second_waiter = ObservableWaiter(10)
 
             @ten_second_waiter
             def take_ten():
@@ -114,7 +114,7 @@ class ObservingWaiter(Waiter):
     Usage as a context manager:
         .. code-block:: python
 
-            with ObservingWaiter(10) as ten_second_waiter:
+            with ObservableWaiter(10) as ten_second_waiter:
                 print('Starting to wait')
 
             print(
@@ -125,7 +125,7 @@ class ObservingWaiter(Waiter):
     """
 
     def __init__(self, minimum_time):
-        super(ObservingWaiter, self).__init__(minimum_time)
+        super(ObservableWaiter, self).__init__(minimum_time)
         self.last_runtime = None
         self.last_elapsed = None
 
@@ -133,8 +133,55 @@ class ObservingWaiter(Waiter):
         # Record the approximate runtime of the wrapped operation
         self.last_runtime = get_time() - self._start_time
 
-        super(ObservingWaiter, self).__exit__(exc_type, exc_val, exc_tb)
+        super(ObservableWaiter, self).__exit__(exc_type, exc_val, exc_tb)
 
         # Record the duration of time since `__enter__` began
         self.last_elapsed = get_time() - self._start_time
 
+
+class StopWatch(ObservableWaiter):
+    """Context manager/decorator for observing the execution time of wrapped operations, but without enforcing
+    a minimum time (a stopwatch!). Useful in cases where :mod:`timeit` is impractical or overcomplicated.
+
+    .. note:: This class is mostly provided out of convenience (primarily for DRYness and readability),
+        since a correctly-configured instance of :class:`ObservableWaiter` could achieve the same behavior.
+        As this class is an implementation of :class:`ObservableWaiter`, it provides the same interface for
+        inspecting statistics. The only effective difference is that this Waiter does not enforce any
+        minimum execution time.
+
+    Example of observing the execution time for a function call by using this class as a decorator:
+        .. code-block:: python
+
+            timer = StopWatch()
+
+            @timer
+            def watch_this():
+                # Do some things
+                ...
+
+            watch_this()
+            logging.log(logging.INFO, 'Watched watch_this() do some things for %r seconds', timer.last_runtime)
+
+    Example of observing the execution time of nested code by using this class as a context manager:
+        .. code-block:: python
+
+            with StopWatch() as timer:
+                # Do some things
+                ...
+
+            logging.log(logging.INFO, 'Watched some things for %r seconds', timer.last_runtime)
+
+    """
+    def __init__(self):
+        """Initializes a StopWatch for observing the execution time of wrapped operations"""
+        super(StopWatch, self).__init__(0)
+
+    def __setattr__(self, name, value):
+        """Prevents the :attr:`minimum_time` attribute from being set to a nonzero value.
+
+        :raises AttributeError: If the :attr:`minimum_value` instance attribute is being set
+            to any value other than zero
+        """
+        if name == 'minimum_time' and value != 0:
+            raise AttributeError('minimum_time attribute is read-only')
+        super(StopWatch, self).__setattr__(name, value)

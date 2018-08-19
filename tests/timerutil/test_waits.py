@@ -92,7 +92,7 @@ class ObservingWaiterInitTestCase(unittest.TestCase):
     def test_initial_state(self):
         minimum_time = 5
 
-        waiter = waits.ObservingWaiter(minimum_time)
+        waiter = waits.ObservableWaiter(minimum_time)
 
         self.assertEqual(waiter.minimum_time, minimum_time)
         self.assertIsNone(waiter._start_time)
@@ -102,7 +102,7 @@ class ObservingWaiterInitTestCase(unittest.TestCase):
 
 class ObservingWaiterExitTestCase(unittest.TestCase):
     def test_records_last_runtime(self):
-        waiter = waits.ObservingWaiter(.5)
+        waiter = waits.ObservableWaiter(.5)
         sleep_time = .2
 
         with waiter:
@@ -112,7 +112,7 @@ class ObservingWaiterExitTestCase(unittest.TestCase):
         self.assertAlmostEqual(sleep_time, waiter.last_runtime, delta=end - waiter._start_time)
 
     def test_records_last_elapsed(self):
-        waiter = waits.ObservingWaiter(.1)
+        waiter = waits.ObservableWaiter(.1)
 
         start = waits.get_time()
         with waiter:
