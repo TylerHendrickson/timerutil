@@ -88,7 +88,7 @@ class WaiterExitTestCase(unittest.TestCase):
         )
 
 
-class ObservingWaiterInitTestCase(unittest.TestCase):
+class ObservableWaiterInitTestCase(unittest.TestCase):
     def test_initial_state(self):
         minimum_time = 5
 
@@ -100,7 +100,7 @@ class ObservingWaiterInitTestCase(unittest.TestCase):
         self.assertIsNone(waiter.last_elapsed)
 
 
-class ObservingWaiterExitTestCase(unittest.TestCase):
+class ObservableWaiterExitTestCase(unittest.TestCase):
     def test_records_last_runtime(self):
         waiter = waits.ObservableWaiter(.5)
         sleep_time = .2
