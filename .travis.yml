@@ -1,0 +1,48 @@
+sudo: false
+language: python
+cache: pip
+
+addons:
+  apt:
+    packages:
+      - pandoc
+
+python:
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
+  - 3.8-dev
+
+env:
+  matrix:
+    - TOXENV=py
+
+matrix:
+  allow_failures:
+    - python: 3.8-dev
+  include:
+    - python: 3.7
+    - os: osx
+      language: generic
+      env: TOXENV=py
+      before_install:
+        - brew update
+        - brew install python3 pandoc
+        - virtualenv venv -p python3
+        - source venv/bin/activate
+
+install:
+  - pip install tox coverage
+
+script:
+  - tox
+
+before_deploy:
+  - pip install wheel
+  - pandoc --from=markdown --to=rst --output=README.rst README.md
+  - python setup.py sdist bdist_wheel
+
+deploy:
