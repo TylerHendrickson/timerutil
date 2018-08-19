@@ -2,18 +2,23 @@ from setuptools import setup
 import sys
 
 
+def get_long_description():
+    with open('docs/source/index.rst') as docs_index:
+        return docs_index.read()
+
+
 test_requirements = []
 if sys.version_info < (3, 3):
     test_requirements = ['mock']
 
 setup(
-    name='Timerutil',
+    name='timerutil',
     version='1.0.0',
-    url='https://github.com/TySkby/timerutil',
+    url='https://github.com/tylerhendrickson/timerutil',
     author='Tyler Hendrickson',
     author_email='hendrickson.tsh@gmail.com',
-    description='Collection of timer-related utilities for Python',
-    long_description=__doc__,
+    description='A handy collection of timer-related utilities for Python',
+    long_description=get_long_description(),
     packages=['timerutil'],
     zip_safe=True,
     tests_require=test_requirements,
@@ -28,6 +33,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Utilities',
     ]
