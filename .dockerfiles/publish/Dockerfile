@@ -5,5 +5,5 @@ CMD ["python", "setup.py", "sdist", "bdist_wheel"]
 CMD ["twine", "upload", "dist/*", \
     "--repository-url", "https://$ARTIFACTORY_BASE_URL/api/pypi/$ARTIFACTORY_LOCAL_REPO", \
     "--username", "$ARTIFACTORY_USER", \
-    "--password", "$ARTIFACTORY_API_KEYz" \
+    "--password", "$ARTIFACTORY_API_KEY" \
 ]
