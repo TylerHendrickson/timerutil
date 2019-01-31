@@ -8,4 +8,4 @@ RUN ["python", "setup.py", "sdist", "bdist_wheel"]
 #    "--username", "$ARTIFACTORY_USER", \
 #    "--password", "$ARTIFACTORY_API_KEY" \
 #]
-CMD ["env"]
+CMD ["echo", "$ARTIFACTORY_BASE_URL"]
