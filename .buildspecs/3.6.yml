@@ -1,0 +1,21 @@
+version: 0.2
+env:
+  variables:
+    LC_ALL: 'C.UTF-8'
+    LANG: 'C.UTF-8'
+phases:
+  install:
+    commands:
+      - echo "Starting Docker daemon..."
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay&
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+      - echo "This is a buildspec file from the source repo"
+  pre_build:
+    commands:
+      - echo "Using Dockerfile at ${DOCKERFILE}"
+      - echo "Building Docker image for test environment..."
+      - docker build -t testenv -f ${DOCKERFILE} .
+  build:
+    commands:
+      - echo "Running tests in Docker environment..."
+      - docker run --env-file <(env | grep ARTIFACTORY) testenv
