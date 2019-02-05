@@ -1,4 +1,7 @@
 FROM python:2.7.12-alpine
 COPY . /code
 WORKDIR /code
-CMD ["python", "setup.py", "test"]
+CMD export ARTIFACTORY_CREDENTIALS=${ARTIFACTORY_USER}:${ARTIFACTORY_API_KEY} && \
+    export ARTIFACTORY_REPO_URL=${ARTIFACTORY_BASE_URL}/api/pypi/${ARTIFACTORY_VIRTUAL_REPO} && \
+    export PIP_INDEX_URL=https://${ARTIFACTORY_CREDENTIALS}@${ARTIFACTORY_REPO_URL} && \
+    python setup.py test
