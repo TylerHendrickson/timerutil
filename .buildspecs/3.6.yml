@@ -14,7 +14,7 @@ phases:
     commands:
       - echo "Using Dockerfile at ${DOCKERFILE}"
       - echo "Building Docker image for test environment..."
-      - docker build -t testenv -f ${DOCKERFILE} .
+      - docker build -t testenv -f .dockerfiles/3.6/Dockerfile .
   build:
     commands:
       - echo "Running tests in Docker environment..."
