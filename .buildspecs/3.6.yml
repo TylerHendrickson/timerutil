@@ -18,4 +18,4 @@ phases:
   build:
     commands:
       - echo "Running tests in Docker environment..."
-      - docker run --env-file <(env | grep ARTIFACTORY) testenv
+      - bash -c "docker run --env-file <(env | grep ARTIFACTORY) testenv"
